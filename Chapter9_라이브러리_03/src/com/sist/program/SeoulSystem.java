@@ -6,15 +6,17 @@ import java.util.*;
 public class SeoulSystem {
 	
 	// 모든 사용자가 데이터를 공통으로 사용
-	private static SeoulLocationVO[] datas = new SeoulLocationVO[273];
+	private static ArrayList list = new ArrayList();
+//	private static SeoulLocationVO[] datas = new SeoulLocationVO[273];
 	
-	private int curpage; // 프로그램 종료시까지 유지
-	private int totalpage;
+//	private int curpage; // 프로그램 종료시까지 유지
+//	private int totalpage;
 	
 	static {
 		
 		// 데이터를 읽어서 메모리에 저장 => 초기화
 		try {
+			
 			StringBuffer sb = new StringBuffer();
 			int i=0;
 			FileReader fr = new FileReader("c:\\javaDev\\seoul_location.txt");
@@ -24,16 +26,16 @@ public class SeoulSystem {
 			fr.close();
 			
 			String[] locations = sb.toString().split("\n");
-			int k = 0;
+
 			for (String s:locations) {
-//				System.out.println(s);
 				StringTokenizer st = new StringTokenizer(s, "|");
-				datas[k] = new SeoulLocationVO();
-				datas[k].setNo(Integer.parseInt(st.nextToken()));
-				datas[k].setName(st.nextToken());
-				datas[k].setContent(st.nextToken());
-				datas[k].setAddress(st.nextToken());
-				k++;
+				SeoulLocationVO vo = new SeoulLocationVO();
+				vo.setNo(Integer.parseInt(st.nextToken()));
+				vo.setName(st.nextToken());
+				vo.setContent(st.nextToken());
+				vo.setAddress(st.nextToken());
+				list.add(vo);
+
 			}
 			
 		} catch (Exception e) {
@@ -42,27 +44,21 @@ public class SeoulSystem {
 	}
 	
 	// 페이지별 데이터 출력
-	public SeoulLocationVO[] seoulList(int page) {
-		SeoulLocationVO[] data = new SeoulLocationVO[10];
+	public ArrayList seoulList(int page) {
 		
-		int j=0; // 10개씩 나눠주는 변수
-		int start=(page*10)-10; // 시작점 (for)
+		int totalpage = (int)(Math.ceil(list.size() / 10.0));
 		
-		/*
-		 *    1page => 0~9
-		 *    2page => 10~19
-		 *    3page => 20~29
-		 *    
-		 */
-		int k=0;
-		for (int i=0; i<datas.length; i++) {
-			if (j<10 && i>=start) {
-				data[k] = datas[i];
-				k++;
-				j++;
-			}
+		int start = (page-1)*10;
+		
+		int end = page*10;
+		
+		if (page == totalpage) {
+			end = totalpage - (10-list.size() % 10); 
 		}
-		return data;
+		
+		ArrayList movieList = new ArrayList(list.subList(start, end));
+		
+		return movieList;
 	}
 	
 	public int seoulTotalPage() {
