@@ -21,6 +21,7 @@ public class MovieSystem {
 				StringTokenizer st = new StringTokenizer(m, "|");
 				MovieVO vo = new MovieVO();
 				vo.setNo(Integer.parseInt(st.nextToken()));
+				vo.setTitle(st.nextToken());
 				vo.setGenre(st.nextToken());
 				vo.setPoster(st.nextToken());
 				vo.setActor(st.nextToken());
@@ -80,6 +81,7 @@ public class MovieSystem {
 			int menu = movieMenu();
 			if (menu==9) {
 				System.out.println("프로그램 종료");
+				break;
 			} else if (menu==1) {
 				Scanner scan = new Scanner(System.in);
 				System.out.print("페이지 입력 : ");
