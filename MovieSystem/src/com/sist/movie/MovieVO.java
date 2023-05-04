@@ -11,7 +11,14 @@ public class MovieVO implements Serializable {
 	private String reservationRate;		// 예매율
 	private String regDate;				// 개봉일
 	private String contents;			// 줄거리(정보)
+	private int cno; 					// 구분자
 	
+	public int getCno() {
+		return cno;
+	}
+	public void setCno(int cno) {
+		this.cno = cno;
+	}
 	public int getRank() {
 		return rank;
 	}

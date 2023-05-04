@@ -30,7 +30,6 @@ public class DataCollectionManager {
 			};
 			
 			// 고유번호 
-						int k=1;
 						for (int i=0; i<urls.length; i++) {
 							Document doc = Jsoup.connect(urls[i]).get();
 							Elements title = doc.select("div.item_poster a.link_txt");
@@ -41,28 +40,26 @@ public class DataCollectionManager {
 							Elements regDate = doc.select("div.item_poster span.txt_info span.txt_num");
 							Elements contents = doc.select("div.item_poster a.link_story");
 							if (i==0) {
-								poster.add(9, new Element("<img src=\"https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png\">"));
+								poster.add(10, new Element("<img src=\"https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png\">"));
 							}
+							if (i==1) {
+								regDate.add(13, new Element("<span class=\"txt_num\">미정</span>"));
+							}
+							int k=1;
 							for (int j=0; j<title.size(); j++) {
 								MovieVO vo = new MovieVO();
 								
 								// 랭킹
-								if (i==0) {
-									System.out.println("랭킹 : " + k);
-									k++;
-								}
+								System.out.println("랭킹 : " + k);
+								
 								System.out.println("카테고리 번호 : " + (i+1));
 								
 								// 타이틀
 								System.out.println(title.get(j).text());
 								
 								// 포스터
-								if (!poster.isEmpty()) {
-									System.out.println(poster.get(j).attr("src"));
-									vo.setPoster(poster.get(j).attr("src"));
-								} else {
-									vo.setPoster("-");
-								}
+								System.out.println(poster.get(j).attr("src"));
+									
 								
 //								// 이용등급
 //								if (!rated.isEmpty() && i==0) {
@@ -76,14 +73,14 @@ public class DataCollectionManager {
 									vo.setAvg(avg.get(j).text());
 								}
 
-								// 평점
-								if (!reservationRate.isEmpty()) {
+								// 예매율
+								if (!reservationRate.isEmpty() && i==0) {
 									System.out.println(reservationRate.get(j).text());
 									vo.setReservationRate(reservationRate.get(j).text());
 								}
 
 								// 개봉일
-								if (!regDate.isEmpty()) {
+								if (!regDate.isEmpty() && (i==0 | i==1)) {
 									System.out.println(regDate.get(j).text());
 									vo.setRegDate(regDate.get(j).text());
 								}
@@ -98,11 +95,13 @@ public class DataCollectionManager {
 								
 								vo.setRank(k);
 								vo.setTitle(title.get(j).text());
-								
+								vo.setPoster(poster.get(j).attr("src"));
+								vo.setCno(i+1);
 								list.add(vo);
+								k++;
 							}
 						}
-						
+						System.out.println("hi");
 						oos.writeObject(list);
 						System.out.println("저장완료");
 		} catch (Exception e) {
