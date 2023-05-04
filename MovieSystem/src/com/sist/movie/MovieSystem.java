@@ -34,7 +34,7 @@ public class MovieSystem {
 	public void movieCategoryData(int cno) {
 		for (MovieVO vo : list) {
 			if (vo.getCno() == cno) {
-				System.out.println(vo.getRank() + "." + vo.getTitle());
+				System.out.println(vo.getRank() + "." + vo.getTitle() + ", 영화번호 : " + vo.getPk() + ", 동영상url : " + vo.getYoutube() );
 			}
 		}
 	}

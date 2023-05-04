@@ -12,7 +12,21 @@ public class MovieVO implements Serializable {
 	private String regDate;				// 개봉일
 	private String contents;			// 줄거리(정보)
 	private int cno; 					// 구분자
+	private int pk;						// 영화번호
+	private String youtube;				// 유튜브링크
 	
+	public String getYoutube() {
+		return youtube;
+	}
+	public void setYoutube(String youtube) {
+		this.youtube = youtube;
+	}
+	public int getPk() {
+		return pk;
+	}
+	public void setPk(int pk) {
+		this.pk = pk;
+	}
 	public int getCno() {
 		return cno;
 	}

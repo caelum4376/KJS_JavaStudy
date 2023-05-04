@@ -39,8 +39,10 @@ public class DataCollectionManager {
 							Elements reservationRate = doc.select("div.item_poster span.info_txt span.txt_num");
 							Elements regDate = doc.select("div.item_poster span.txt_info span.txt_num");
 							Elements contents = doc.select("div.item_poster a.link_story");
+							Elements pk = doc.select("div.item_poster strong.tit_item a");
+							
 							if (i==0) {
-								poster.add(10, new Element("<img src=\"https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png\">"));
+								poster.add(11, new Element("<img src=\"https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png\">"));
 							}
 							if (i==1) {
 								regDate.add(13, new Element("<span class=\"txt_num\">미정</span>"));
@@ -91,11 +93,16 @@ public class DataCollectionManager {
 									vo.setContents(contents.get(j).text());
 								}
 								
+								// 영화번호
+								System.out.println(pk.get(j).attr("href").substring(pk.get(j).attr("href").lastIndexOf("=")+1));
+								vo.setPk(Integer.parseInt(pk.get(j).attr("href").substring(pk.get(j).attr("href").lastIndexOf("=")+1)));
+								
 								System.out.println("===============================");
 								
 								vo.setRank(k);
 								vo.setTitle(title.get(j).text());
 								vo.setPoster(poster.get(j).attr("src"));
+								vo.setYoutube(youtubeKeyData(title.get(j).text()));
 								vo.setCno(i+1);
 								list.add(vo);
 								k++;
@@ -116,4 +123,25 @@ public class DataCollectionManager {
 		}
 	}
 
+	public static String youtubeKeyData(String title) {
+		String key="";
+		try {
+			String url = "https://www.youtube.com/results?search_query="+URLEncoder.encode(title, "UTF-8");
+			Document doc = Jsoup.connect(url).get();
+			String data = doc.toString();
+			Pattern p = Pattern.compile("/watch\\?v=[^가-힣]+");
+			Matcher m = p.matcher(data);
+			
+			while(m.find()) {
+				String s=m.group();
+				s=s.substring(s.indexOf("=")+1, s.indexOf("\""));
+				key = s;
+				break;
+			}
+		} catch (Exception e) {
+			
+		}
+		
+		return key;
+	}
 }
