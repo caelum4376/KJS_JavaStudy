@@ -24,7 +24,7 @@ public class GenieMusicVO implements Serializable {
 	private String title;
 	private String singer;
 	private String album;
-	private String porster;
+	private String poster;
 	private int idcrement; // 등폭
 	private String state; // 유지, 상승, 하락
 	private int cno; // 구분자
@@ -54,11 +54,11 @@ public class GenieMusicVO implements Serializable {
 	public void setAlbum(String album) {
 		this.album = album;
 	}
-	public String getPorster() {
-		return porster;
+	public String getPoster() {
+		return poster;
 	}
-	public void setPorster(String porster) {
-		this.porster = porster;
+	public void setPoster(String poster) {
+		this.poster = poster;
 	}
 	public int getIdcrement() {
 		return idcrement;

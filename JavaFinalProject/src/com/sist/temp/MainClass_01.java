@@ -116,7 +116,7 @@ public class MainClass_01 extends JFrame {
 //			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.McWinLookAndFeel");
 //			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.MintLookAndFeel");
 //			UIManager.setLookAndFeel("com.jtattoo.plaf.luna.LunaLookAndFeel");
-			UIManager.setLookAndFeel("com.jtattoo.plaf.luna.AcrylLookAndFeel");
+			UIManager.setLookAndFeel("com.jtattoo.plaf.acryl.AcrylLookAndFeel");
 			
 //			UIManager.setLookAndFeel("com.jtattoo.plaf.bernstein.BernsteinLookAndFeel");
 //			UIManager.setLookAndFeel("com.jtattoo.plaf.fast.FastLookAndFeel");
