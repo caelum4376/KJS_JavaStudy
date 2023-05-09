@@ -1,19 +1,29 @@
 package com.sist.temp;
-import java.awt.*;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+/////////////// 네트워크 관련 ///////////////////
+import java.util.List;
+import java.util.StringTokenizer;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
 
 import com.sist.commons.Function;
 import com.sist.commons.ImageChange;
 import com.sist.manager.GenieMusicVO;
 import com.sist.manager.MusicSystem;
-import java.util.*;
-/////////////// 네트워크 관련 ///////////////////
-import java.util.List;
-import java.io.*;
-import java.net.*;
 /*
  *   프로그램 => 2개 
  *   1) 로그인 , 채팅문자열 입력 ... 일반 사용자 
@@ -21,24 +31,38 @@ import java.net.*;
  *      ----------------------- 쓰레드 
  */
 public class NetworkMain extends JFrame 
-implements ActionListener,Runnable{
-    MenuPanel mp;
+implements ActionListener,Runnable, MouseListener {
+	MenuPanel mp;
     ControlPanel cp;
     TopPanel tp;
     JButton b1,b2,b3,b4,b5;
     JLabel logo;
     Login login=new Login();
+    
     // 페이지 지정 
     int curpage=1;
     int totalpage=0;
     MusicSystem ms=new MusicSystem();
+    
     /// 네트워크 관련 클래스 
     // 서버연결 => 연결기기 
     Socket s; // 서버의 메모리 연결 
+    
     // 서버에서 보내준 값을 받는다 
     BufferedReader in;
+    
     // 서버로 값을 전송 
     OutputStream out;
+    
+    // ID저장
+    String myId;
+    
+    // 테이블 선택 인덱스번호
+    int selectRow = -1;
+    
+    // 쪽지 보내기
+    SendMessage sm = new SendMessage();
+    RecvMessage rm = new RecvMessage();
     public NetworkMain()
     {
     	logo=new JLabel();
@@ -101,7 +125,52 @@ implements ActionListener,Runnable{
     	cp.hp.b2.addActionListener(this);// 다음
     	cp.hp.pageLa.setText(curpage+" page /"
                 + totalpage+" pages");
+    	cp.cp.b1.addActionListener(this); // 쪽지보내기
+    	cp.cp.b2.addActionListener(this); // 정보보기
+    	cp.cp.table.addMouseListener(this);
+    	
+    	// 쪽지보내기
+    	sm.b1.addActionListener(this);
+    	sm.b2.addActionListener(this);
+    	rm.b1.addActionListener(this);
+    	rm.b2.addActionListener(this);
     }
+    
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getSource() == cp.cp.table) {
+//			if (e.getClickCount() == 2) { // 더블클릭
+			
+				selectRow = cp.cp.table.getSelectedRow();
+				String id = cp.cp.table.getValueAt(selectRow, 0).toString();
+//				JOptionPane.showMessageDialog(this, "선택된 ID : " + id);
+				if (id.equals(myId)) {
+					cp.cp.b1.setEnabled(false);
+					cp.cp.b2.setEnabled(false);
+				} else {
+					cp.cp.b1.setEnabled(true);
+					cp.cp.b2.setEnabled(true);
+				}
+			}
+//		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		try
@@ -187,7 +256,8 @@ implements ActionListener,Runnable{
 			try
 			{
 				// 서버 연결 
-				s=new Socket("211.238.142.117",33333);
+//				s=new Socket("211.238.142.117",33333);
+				s=new Socket("localhost",33333);
 				// 서버 컴퓨터 => IP 
 				// 211.238.142.()
 				// 읽는 위치 / 쓰는 위치
@@ -239,6 +309,53 @@ implements ActionListener,Runnable{
 				curpage++;
 				musicDisplay();
 			}
+		} else if (e.getSource() == cp.cp.b2) {
+			// 정보보기
+			if (selectRow == -1) {
+				JOptionPane.showMessageDialog(this, "정보볼 대상을 선택하세요");
+				return;
+			}
+			// 선택된 경우
+			String youId = cp.cp.table.getValueAt(selectRow, 0).toString();
+			try {
+				// 선택된 아이디의 정보를 보여달라 (서버에 요청)
+				// out.write => 서버요청 => \n포함되야 한다
+				// 처리 => 서버 => 결과값을 받아서 클라이언트에서 출력
+				out.write((Function.INFO+"|"+youId+"\n").getBytes());
+			} catch (Exception ee) {
+				
+			}
+		} else if (e.getSource() == cp.cp.b1) {
+			// 쪽지보내기
+			sm.ta.setText("");
+			String youId = cp.cp.table.getValueAt(selectRow, 0).toString();
+			
+			sm.tf.setText(youId);
+			sm.setVisible(true);
+		} else if (e.getSource() == sm.b2) {
+			sm.setVisible(false);
+		} else if (e.getSource() == rm.b2) {
+			rm.setVisible(false);
+		} else if (e.getSource() == sm.b1) {
+			String youId = sm.tf.getText();
+			String msg = sm.ta.getText();
+			if (msg.length() < 1) {
+				sm.ta.requestFocus();
+				return;
+			}
+			try {
+				// youId를 찾아서 msg를 보내주는 기능을 수행
+				out.write((Function.MSGSEND + "|" + youId + "|" + msg + "\n").getBytes());
+			} catch (Exception ee) {
+				
+			}
+			// 창을감춘다
+			sm.setVisible(false);
+		} else if (e.getSource() == rm.b1) {
+			sm.tf.setText(rm.tf.getText());
+			sm.ta.setText("");
+			sm.setVisible(true);
+			rm.setVisible(false);
 		}
 		
 	}
@@ -277,6 +394,7 @@ implements ActionListener,Runnable{
 				  case Function.MYLOG:
 				  {
 					  setTitle(st.nextToken());
+					  myId = st.nextToken();
 					  login.setVisible(false);
 					  setVisible(true);
 				  }
@@ -286,6 +404,25 @@ implements ActionListener,Runnable{
 					  cp.cp.initStyle();
 					  cp.cp.append(st.nextToken(),st.nextToken());
 					  //           채팅문자열          색상 
+				  }
+				  break;
+				  case Function.INFO:
+				  {
+							// 전송기능
+							String data = "아이디 : " + st.nextToken() + "\n"
+									+ "이름 : " + st.nextToken() + "\n"
+									+ "성별 : "	+ st.nextToken();
+							JOptionPane.showMessageDialog(this, data);
+							
+				  }
+				  break;
+				  case Function.MSGSEND:
+				  {
+					  String id = st.nextToken();
+					  String strMsg = st.nextToken();
+					  rm.tf.setText(id);
+					  rm.ta.setText(strMsg);
+					  rm.setVisible(true);
 				  }
 				  break;
 				}

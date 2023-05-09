@@ -126,7 +126,7 @@ public class NetworkMain_02 extends JFrame implements ActionListener {
 		List<GenieMusicVO> list = ms.musicListData(curpage);
 		cp.hp.cardInit(list);
 		cp.hp.cardPrint(list);
-		totalpage = ms.musicTotalPage();v
+		totalpage = ms.musicTotalPage();
 		cp.hp.pageLa.setText(curpage +" page /" + totalpage + " page");
 		// HomePage
 		cp.hp.b1.addActionListener(this); // 이전 
@@ -171,20 +171,20 @@ public class NetworkMain_02 extends JFrame implements ActionListener {
 			// 서버로 전송 
 			try {
 				// 서버 연결 
-				s = new Socket("localhost", 33333);
+//				s = new Socket("localhost", 33333);
 				
 				// 서버컴퓨터 => ip
 				// 211.238.142.()
 				// 읽는 위치 / 쓰는 위치
-				in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+//				in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 				
 				// s는 서버메모리 => 서버메모리로부터 값을 읽어 온다
 				
 				// 서버로 로그인 요청
-				out.write((Function.LOGIN+"|"+id+"|"+name+"|"+sex+"\n"));
+//				out.write((Function.LOGIN+"|"+id+"|"+name+"|"+sex+"\n"));
 			} catch (Exception ee) {
 				// 서버로부터 전송된 값을 받아온다
-				new Thread(this).start(); // run()호출 
+//				new Thread(this).start(); // run()호출 
 			}
 		} else if (e.getSource() == login.b2) {
 			System.exit(0); // 프로그램 종료

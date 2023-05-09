@@ -1,6 +1,8 @@
 package com.sist.manager;
 import java.io.*;
 import java.util.*;
+
+import com.sist.manager.GenieMusicVO;
 public class MusicSystem {
     // 데이터 읽기 
 	private static List<GenieMusicVO> list=
@@ -54,6 +56,8 @@ public class MusicSystem {
 	{
 		return (int)(Math.ceil(list.size()/20.0));
 	}
+	
+	
 	public List<GenieMusicVO> musicCategoryData(int cno)
 	{
 		List<GenieMusicVO> mList=
@@ -79,6 +83,17 @@ public class MusicSystem {
 			}
 		}
 		return mList;
+	}
+
+	public GenieMusicVO musicDetailData(String title) {
+		GenieMusicVO vo = new GenieMusicVO();
+		for (GenieMusicVO gvo:list) {
+			if (gvo.getTitle().equals(title)) {
+				vo = gvo;
+				break;
+			}
+		}
+		return vo;
 	}
 	public static void main(String[] args) {
 		MusicSystem ms=new MusicSystem();
