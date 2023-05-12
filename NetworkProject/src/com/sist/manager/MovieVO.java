@@ -2,37 +2,20 @@ package com.sist.manager;
 
 import java.io.Serializable;
 
-public class MovieVO implements Serializable {
-	private int rank;					// 랭킹
-	private String title;				// 제목
-	private String rated;				// 이용등급
-	private String poster;				// 포스터
-	private String avg;					// 평점
-	private String reservationRate;		// 예매율
-	private String regDate;				// 개봉일
-	private String contents;			// 줄거리(정보)
-	private int cno; 					// 구분자
-	private int pk;						// 영화번호
-	private String youtube;				// 유튜브링크
+public class MovieVO implements Serializable { // 데이터 직렬화
+	private int rank;
+	private String title;
+	private String poster;
+	private String age;
+	private String grade; 
+	private String reservation;
+	private String regDate;
+	private String content;
+	private int cno;
+	private int pk;
+	private String key;
 	
-	public String getYoutube() {
-		return youtube;
-	}
-	public void setYoutube(String youtube) {
-		this.youtube = youtube;
-	}
-	public int getPk() {
-		return pk;
-	}
-	public void setPk(int pk) {
-		this.pk = pk;
-	}
-	public int getCno() {
-		return cno;
-	}
-	public void setCno(int cno) {
-		this.cno = cno;
-	}
+	
 	public int getRank() {
 		return rank;
 	}
@@ -45,29 +28,29 @@ public class MovieVO implements Serializable {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getRated() {
-		return rated;
-	}
-	public void setRated(String rated) {
-		this.rated = rated;
-	}
 	public String getPoster() {
 		return poster;
 	}
 	public void setPoster(String poster) {
 		this.poster = poster;
 	}
-	public String getAvg() {
-		return avg;
+	public String getAge() {
+		return age;
 	}
-	public void setAvg(String avg) {
-		this.avg = avg;
+	public void setAge(String age) {
+		this.age = age;
 	}
-	public String getReservationRate() {
-		return reservationRate;
+	public String getGrade() {
+		return grade;
 	}
-	public void setReservationRate(String reservationRate) {
-		this.reservationRate = reservationRate;
+	public void setGrade(String grade) {
+		this.grade = grade;
+	}
+	public String getReservation() {
+		return reservation;
+	}
+	public void setReservation(String reservation) {
+		this.reservation = reservation;
 	}
 	public String getRegDate() {
 		return regDate;
@@ -75,11 +58,29 @@ public class MovieVO implements Serializable {
 	public void setRegDate(String regDate) {
 		this.regDate = regDate;
 	}
-	public String getContents() {
-		return contents;
+	public String getContent() {
+		return content;
 	}
-	public void setContents(String contents) {
-		this.contents = contents;
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public int getCno() {
+		return cno;
+	}
+	public void setCno(int cno) {
+		this.cno = cno;
+	}
+	public String getKey() {
+		return key;
+	}
+	public void setKey(String key) {
+		this.key = key;
+	}
+	public int getPk() {
+		return pk;
+	}
+	public void setPk(int pk) {
+		this.pk = pk;
 	}
 	
 }

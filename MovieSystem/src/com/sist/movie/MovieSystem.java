@@ -14,7 +14,8 @@ public class MovieSystem {
 		ObjectInputStream ois = null;
 
 		try {
-			fis = new FileInputStream("C:\\java_datas\\daum_movie.txt");
+//			fis = new FileInputStream("C:\\java_datas\\daum_movie.txt");
+			fis = new FileInputStream("/Users/caelum/Documents/java_datas/daum_movie.txt");
 			ois = new ObjectInputStream(fis);
 
 			list = (List<MovieVO>) ois.readObject();

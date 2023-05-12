@@ -1,18 +1,23 @@
 package com.sist.client;
 
-import java.awt.*;
-import javax.swing.*;
-public class Login extends JFrame {
-	JLabel la1, la2, la3;
-	JTextField tf1, tf2;
-	JRadioButton rb1, rb2;
-	JButton b1, b2;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+public class Login extends JFrame{
+	JLabel la1,la2,la3; // "아이디", "이름", "성명" 표시 
+	JTextField tf1,tf2; // 아이디, 이름 입력 창
+	JRadioButton rb1,rb2; // 남녀 성별 체크
+	JButton b1,b2; // 로그인,취소 버튼
 	
-	public Login() {
-		
-		// 각 클래스 초기화
+	public Login()
+	{
 		setLayout(null);
-		la1 = new JLabel("ID");
+		la1 = new JLabel("아이디");
 		la2 = new JLabel("이름");
 		la3 = new JLabel("성별");
 		
@@ -21,18 +26,13 @@ public class Login extends JFrame {
 		
 		rb1 = new JRadioButton("남자");
 		rb2 = new JRadioButton("여자");
-		
-		// 라디오버튼은 그룹으로 묶는다
-		ButtonGroup bg = new ButtonGroup();
+		ButtonGroup bg = new ButtonGroup(); // 버튼 그룹으로 묶는다.
 		bg.add(rb1); bg.add(rb2);
-		
-		// 디폴트
-		rb1.setSelected(true);
+		rb1.setSelected(true); // rb1이 디폴트
 		
 		b1 = new JButton("로그인");
 		b2 = new JButton("취소");
 		
-		// 윈도우에 배치
 		la1.setBounds(10, 15, 60, 30);
 		tf1.setBounds(80, 15, 150, 30);
 		
@@ -44,27 +44,21 @@ public class Login extends JFrame {
 		rb2.setBounds(155, 85, 70, 30);
 		
 		JPanel p = new JPanel();
-		p.add(b1);
-		p.add(b2);
+		p.add(b1);p.add(b2);
 		
-		p.setBounds(10, 120, 215, 35);
+		p.setBounds(10, 120, 215, 30);
 		
-		add(la1); add(tf1); 
-		add(la2); add(tf2);
-		add(la3); add(rb1); add(rb2);
+		add(la1); add(tf1); // 아이디 [        ]
+		add(la2); add(tf2); // 이름 [        ]
+		add(la3); add(rb1); add(rb2); // 성별 ●남자 ○여자
 		add(p);
 		
-		setSize(270, 200);
+		setSize(270,200);
 		setVisible(true);
 	}
-	
 	public static void main(String[] args) {
-		try {
-			UIManager.setLookAndFeel("com.jtattoo.plaf.acryl.AcrylLookAndFeel");
-		} catch (Exception e) {
+		
 
-		}
-		new Login();
 	}
-	
+
 }
