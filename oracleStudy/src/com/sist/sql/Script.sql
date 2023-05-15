@@ -597,3 +597,58 @@ FROM DUAL;
 SELECT ENAME, EMPNO
 FROM EMP e 
 WHERE MOD(EMPNO, 2) = 0;
+
+/*
+ *	SYSDATE : 시스템의 시간을 읽어온다
+ *	=> 날짜 등록을 하지 않는다
+ *	MONTHS_BETWEEN : 기간의 개월수를 읽어 온다 (시간) => 소수점	
+ * 	ADD_MONTHS : 지정된 개월의 날짜 읽기
+ *  NEXT_DAY : 다음날부터 시작해서 다음에 돌아오는 요일은 몇일
+ * 	LAST_DAY : 월 지정 => 지정된 월의 마지막 날 확인
+ * 	ROUND***, TRUNC***
+ */
+
+SELECT SYSDATE FROM DUAL;
+
+-- 내일, 어제 => 산술연산이 가능
+SELECT SYSDATE-1 "어제", SYSDATE "오늘", SYSDATE+1 "내일"
+FROM DUAL;
+
+-- NEXT_DAY
+SELECT NEXT_DAY(SYSDATE, '월')
+FROM DUAL;
+
+-- LAST_DAY
+SELECT LAST_DAY('23/03/01')
+FROM DUAL;
+
+-- MONTHS_BETWEEN
+SELECT ENAME, HIREDATE, TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE)) "근무개월",
+		ROUND(TRUNC(MONTHS_BETWEEN(SYSDATE, HIREDATE))/12) "년차"
+FROM EMP;
+
+-- ADD_MONTHS(SYSDATE, 4)
+SELECT ADD_MONTHS(SYSDATE, 6)
+FROM DUAL;
+
+-- 변환함수
+/*
+ *	TO_CHAR*** : 문자열 변경 => 숫자, 날짜
+ *	------- SimpleDateFormat (날짜변환)
+ *			DecimalFormat (숫자변환)
+ *		=> yy, yyyy (대소문 구분이 없다) 년도
+ *			m, mm 월
+ *			d, dd 일
+ *			h, hh 시간
+ *			hh24
+ *			mi : 분
+ *			ss : 초
+ *		숫자 => 999,999 => $99,999 => L999,999
+ *	TO_NUMBER : 
+ *	TO_DATE
+ */
+SELECT ENAME, SAL, TO_CHAR(SAL, '$999,999'), TO_CHAR(SAL, 'L999,999')
+FROM EMP;
+
+SELECT ENAME, HIREDATE, TO_CHAR(HIREDATE, 'YYYY/MM/DD HH24:MI:SS')
+FROM EMP;
