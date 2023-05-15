@@ -1,148 +1,206 @@
 package com.sist.manager;
-import java.util.*;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.*;
-import java.net.*;
+
+
 public class DataCollectionManager {
+	public static String youtubeKeyData(String title)
+	{
+		String key="";
+		try
+		{
+			String url="https://search.naver.com/search.naver?where=video&sm=tab_jum&query="+URLEncoder.encode(title,"UTF-8");
+			Document doc = Jsoup.connect(url).get();
+			Elements data = doc.select(".btn_save"); 
+			if (data.size() > 0) {
+				int i=0;
+				while(true) {
+					if (data.get(i).attr("data-url").toString().contains("tv.naver.com")) {
+						String video = data.get(i).attr("data-url").toString();
+						return video.substring(video.indexOf("v/")+2);
+					}
+					i++;
+				}
+	        }
+			
+		}catch(Exception ex) {}
+		return key;
+		
+//		String key="";
+//		try
+//		{
+//			String url="https://www.youtube.com/results?search_query="+URLEncoder.encode(title,"UTF-8");
+//			//https://www.youtube.com/results?search_query=%EC%95%84%EC%9D%B4%EB%B8%8C
+//			Document doc = Jsoup.connect(url).get();
+//			String data = doc.toString();
+//			Pattern p = Pattern.compile("/watch\\?v=[^가-힣]+");
+//			Matcher m = p.matcher(data);
+//			while(m.find())
+//			{
+//				String s=m.group();
+//				s=s.substring(s.indexOf("=")+1,s.indexOf("\""));
+//				key=s;
+//				break;
+//			}
+//			
+//		}catch(Exception ex) {}
+//		return key;
+	}
 
 	public static void main(String[] args) {
-		
-		List<MovieVO> list = new ArrayList<MovieVO>();
+		List<MovieVO> list = new ArrayList<MovieVO>(); //MovieVo 클래스 데이터형 list 생성
 		FileOutputStream fos = null;
-		ObjectOutputStream oos = null;
-		
-		try {
-			fos = new FileOutputStream("c:\\java_datas\\daum_movie.txt");
-			oos = new ObjectOutputStream(fos);
+		ObjectOutputStream oos = null; 
+		try
+		{
+			fos = new FileOutputStream("/Users/caelum/Documents/java_datas/DaumMovie_01.txt"); // 데이터 출력
+			oos = new ObjectOutputStream(fos);// 데이터 객체 단위 저장
 			
-			// 사이트연결
 			String[] urls = {
-					"https://movie.daum.net/ranking/reservation",
-					"https://movie.daum.net/ranking/boxoffice/weekly",
-					"https://movie.daum.net/ranking/ott"
-			};
+								"https://movie.daum.net/ranking/reservation",// 예매율 순위
+								"https://movie.daum.net/ranking/boxoffice/weekly",// 박스오피스 순위
+								"https://movie.daum.net/ranking/ott" // ott순위
+							}; // url 배열 생성
+			/*
+			 *      private int rank;
+			 *	    private String title;
+			 *		private String poster;
+			 * 		private String age;
+			 *      private String grade;
+			 *		private String reservation;
+			 *		private String regDate;
+			 *		private String content;
+			 *		private int cno;
+			 *		private String key;
+			 */
 			
-			// 고유번호 
-						for (int i=0; i<urls.length; i++) {
-							Document doc = Jsoup.connect(urls[i]).get();
-							Elements title = doc.select("div.item_poster a.link_txt");
-//							Elements rated = doc.select("span.txt_tag");
-							Elements poster = doc.select("div.item_poster div.poster_movie img");
-							Elements avg = doc.select("div.item_poster span.info_txt span.txt_grade");
-							Elements reservationRate = doc.select("div.item_poster span.info_txt span.txt_num");
-							Elements regDate = doc.select("div.item_poster span.txt_info span.txt_num");
-							Elements contents = doc.select("div.item_poster a.link_story");
-							Elements pk = doc.select("div.item_poster strong.tit_item a");
-							
-							if (i==0) {
-								poster.add(10, new Element("img")
-									    .attr("src", "https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png"));
-							}
-							if (i==1) {
-								regDate.add(12, new Element("span").attr("text","미정"));
-							}
-							int k=1;
-							for (int j=0; j<title.size(); j++) {
-								MovieVO vo = new MovieVO();
-								
-								// 랭킹
-								System.out.println("랭킹 : " + k);
-								
-								System.out.println("카테고리 번호 : " + (i+1));
-								
-								// 타이틀
-								System.out.println(title.get(j).text());
-								
-								// 포스터
-								System.out.println(poster.get(j).attr("src"));
-									
-								
-//								// 이용등급
-//								if (!rated.isEmpty() && i==0) {
-//									System.out.println(rated.get(j).text());
-//									vo.setRated(rated.get(j).text());
-//								}
-								
-								// 평점
-								if (!avg.isEmpty() && i==0) {
-									System.out.println(avg.get(j).text());
-									vo.setAvg(avg.get(j).text());
-								}
+			for(int i=0;i<urls.length;i++)
+			{
+				Document doc = Jsoup.connect(urls[i]).get();
+				Elements title = doc.select("strong.tit_item a.link_txt");
+				Elements poster = doc.select("div.item_poster div.poster_movie img");
+				Elements age = doc.select("span.ico_see");
+				Elements grade = doc.select("span.txt_append span.txt_grade");
+				Elements reservation = doc.select("span.txt_append span.txt_num");
+				Elements regDate = doc.select("span.txt_info span.txt_num");
+				Elements content = doc.select("a.link_story");
+				Elements pk = doc.select("div.item_poster strong.tit_item a");
+				// index=16,뮤지컬 공연실황, 알쏭달쏭 캐치! 티니핑 <신비한 상자를 열어라!> 포스터가 없음.
+//				if (i==0) {
+//					poster.add(16, new Element("img")
+//						    .attr("src", "https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png"));
+//					/*
+//					 *    이 코드는 반복문에서 i가 0일 때 poster 리스트의 16번째 인덱스에 새로운 "img" 요소를 추가하고, 
+//					 *    "src" 속성에 "https://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png" 값을 설정하는 것입니다.
+//					 */
+//				}
+				if(i==1)
+				{
+					poster.add(10, new Element("img")
+						    .attr("src", "http://t1.daumcdn.net/movie/movie2020/pc/ico_noimage.png"));
+					
+					regDate.add(12, new Element("span.txt_info span.txt_num").appendText("개봉일 정보 없음"));
+					age.add(12,new Element("span.ico_see").appendText("연령 제한 정보 없음"))	;
+					/*
+					 *    regDate와 age 라는 ArrayList의 12번 인덱스에 각각 span 요소를 추가하고, 
+					 *    appendText() 메서드를 사용하여 내용을 추가하고 있습니다.
+					 *    "개봉일 없음"과 "연령 제한 정보 없음"은 각각 span 요소 안에 들어가는 텍스트 내용입니다. 
+					 *    따라서 해당 ArrayList의 12번 인덱스에는 span 요소가 추가되어 있을 것입니다.
+					 */
+				}
+				int k=1; // 랭킹
+				for(int j=0;j<title.size();j++)
+				{
+					MovieVO vo = new MovieVO();
+					/*
+					 *   예매 순위
+					 *   = 순위, 제목, 포스터, 연령제한, 평점, 예매율, 개봉일, 내용
+					 *   
+					 *   박스오피스 순위
+					 *   = 순위, 제목, 포스터, 연령제한, 개봉일, 내용
+					 *   
+					 *   OTT 순위
+					 *   = 순위, 제목 ,포스터
+					 *   
+					 *   예매 순위, 박스오피스 순위, OTT순위 공통적으로 가지고있는 정보
+					 *   = 순위, 제목, 포스터 (+ 유튜브)
+					 */
+					System.out.println("카테고리번호 : "+(i+1));
+					System.out.println("영화 랭킹 : "+k);
+					System.out.println("영화 제목 : "+title.get(j).text());
+					if(!age.isEmpty())
+					{
+						System.out.println("연령제한 : "+age.get(j).text());
+						vo.setAge(age.get(j).text());
+					}
+					if(!grade.isEmpty())
+					{
+						System.out.println("평점 : "+grade.get(j).text());
+						vo.setGrade(grade.get(j).text());
+					}
+					if(!reservation.isEmpty())
+					{
+						System.out.println("예매율 : "+reservation.get(j).text());
+						vo.setReservation(reservation.get(j).text());
+					}
+					if(!regDate.isEmpty())
+					{
+						System.out.println("개봉일 : "+regDate.get(j).text());
+						vo.setRegDate(regDate.get(j).text());
+					}
+					if(!content.isEmpty())
+					{
+						System.out.println("줄거리: "+content.get(j).text());
+						vo.setContent(content.get(j).text());
+					}
+					
+					
+					System.out.println("포스터 : "+poster.get(j).attr("src"));
+					System.out.println("동영상: "+youtubeKeyData(title.get(j).text()));
+					System.out.println("======================================");
 
-								// 예매율
-								if (!reservationRate.isEmpty() && i==0) {
-									System.out.println(reservationRate.get(j).text());
-									vo.setReservationRate(reservationRate.get(j).text());
-								}
-
-								// 개봉일
-								if (!regDate.isEmpty() && (i==0 | i==1)) {
-									System.out.println(regDate.get(j).text());
-									vo.setRegDate(regDate.get(j).text());
-								}
-
-								// 줄거리
-								if (!contents.isEmpty()) {
-									System.out.println(contents.get(j).text());
-									vo.setContents(contents.get(j).text());
-								}
-								
-								// 영화번호
-								System.out.println(pk.get(j).attr("href").substring(pk.get(j).attr("href").lastIndexOf("=")+1));
-								vo.setPk(Integer.parseInt(pk.get(j).attr("href").substring(pk.get(j).attr("href").lastIndexOf("=")+1)));
-								
-								System.out.println("===============================");
-								
-								vo.setRank(k);
-								vo.setTitle(title.get(j).text());
-								vo.setPoster(poster.get(j).attr("src"));
-								vo.setYoutube(youtubeKeyData(title.get(j).text()));
-								vo.setCno(i+1);
-								list.add(vo);
-								k++;
-							}
-						}
-						System.out.println("hi");
-						oos.writeObject(list);
-						System.out.println("저장완료");
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				fos.close();
-				oos.close();
-			} catch (Exception e) {
+					vo.setRank(k);
+					vo.setCno(i+1);
+					vo.setTitle(title.get(j).text());
+					vo.setPoster(poster.get(j).attr("src"));
+					vo.setKey(youtubeKeyData(title.get(j).text()));
+					vo.setPk(Integer.parseInt(pk.get(j).attr("href").substring(pk.get(j).attr("href").lastIndexOf("=")+1)));
+					list.add(vo);
+					k++;
+					
+				}
+				
 				
 			}
+			oos.writeObject(list);
+			System.out.println("저장 완료!!");
+		}catch(Exception ex)
+		{
+			ex.printStackTrace();
 		}
-	}
-
-	public static String youtubeKeyData(String title) {
-		String key="";
-		try {
-			String url = "https://www.youtube.com/results?search_query="+URLEncoder.encode(title, "UTF-8");
-			Document doc = Jsoup.connect(url).get();
-			String data = doc.toString();
-			Pattern p = Pattern.compile("/watch\\?v=[^가-힣]+");
-			Matcher m = p.matcher(data);
-			
-			while(m.find()) {
-				String s=m.group();
-				s=s.substring(s.indexOf("=")+1, s.indexOf("\""));
-				key = s;
-				break;
-			}
-		} catch (Exception e) {
-			
+		finally
+		{
+			try
+			{
+				fos.close();
+				oos.close();
+			} catch (Exception e) {}
 		}
 		
-		return key;
+		
 	}
+
 }

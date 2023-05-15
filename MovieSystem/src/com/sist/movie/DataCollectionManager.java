@@ -19,7 +19,8 @@ public class DataCollectionManager {
 		ObjectOutputStream oos = null;
 		
 		try {
-			fos = new FileOutputStream("c:\\java_datas\\daum_movie.txt");
+//			fos = new FileOutputStream("c:\\java_datas\\daum_movie.txt");
+			fos = new FileOutputStream("/Users/caelum/Documents/java_datas/daum_movie.txt");
 			oos = new ObjectOutputStream(fos);
 			
 			// 사이트연결

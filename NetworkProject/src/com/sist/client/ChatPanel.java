@@ -1,85 +1,79 @@
 package com.sist.client;
 
-
 import java.awt.Color;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-// 750 730
-public class ChatPanel extends JPanel {
-	
-	JTextPane pane;
-	JTextField tf;
-	JButton b1, b2;
+
+import com.sist.inter.ChatInterface;
+
+public class ChatPanel extends JPanel implements ChatInterface {
+	JTextPane pane; // 텍스트 속성 지원
+	JTextField tf;// 텍스트 입력란
+	JButton b1,b2; // 쪽지 보내기, 정보보기
 	JTable table; // 화면 UI
 	DefaultTableModel model; // 데이터 관리
 	JComboBox<String> box;
-	/*
-	 *    화면관리 / 데이터관리를 따로하는 프로그램
-	 *    --------   ----------
-	 *     View         Model    ==> 연결 (Controller)
-	 *    MVC(Spring)
-	 */
-	
-	public ChatPanel() {
-		// 초기화
+	public ChatPanel()
+	{
+//		setBackground(Color.darkGray);
 		pane = new JTextPane();
+		pane.setEditable(false); // false이면 텍스트 컴포넌트는 읽기 전용,true면 텍스트 컴포넌트 내용변경 가능
+		JScrollPane js1= new JScrollPane(pane);
+		b1 = new JButton("쪽지보내기");
+		b2 = new JButton("정보보기");
+		JPanel p = new JPanel();
 		
-		JScrollPane js1 = new JScrollPane(pane);
+		p.add(b1);
+		p.add(b2);
 		tf = new JTextField();
 		box = new JComboBox<String>();
 		
-		// red => 알림
 		box.addItem("black");
 		box.addItem("blue");
 		box.addItem("yellow");
 		box.addItem("green");
 		box.addItem("pink");
+		box.addItem("orange");
 		box.addItem("cyan");
 		
-		// 테이블
 		String[] col = {"아이디", "이름", "성별"};
 		String[][] row = new String[0][3];
-		model = new DefaultTableModel(row, col);
+		model = new DefaultTableModel(row, col) {
+			// 익명의 클래스 => 상속없이 오버라이딩이 가능
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+
+		};
 		table = new JTable(model);
 		JScrollPane js2 = new JScrollPane(table);
-		b1 = new JButton("쪽지보내기");
-		b2 = new JButton("정보보기");
-		JPanel p = new JPanel();
-		p.add(b1);
-		p.add(b2);
 		
-		// 배치
+		//배치
 		setLayout(null);
-		js1.setBounds(10, 15, 500, 600);
-		tf.setBounds(10, 620, 380, 30);
-		box.setBounds(395, 620, 115, 30);
-		js2.setBounds(520, 15, 230, 250);
-		p.setBounds(520, 270, 230, 35);
+		js1.setBounds(0, 0, 650, 600);
+		tf.setBounds(0, 600, 500, 30);
+		box.setBounds(500, 600, 150, 30);
+		js2.setBounds(660, 0, 230, 600);
+		p.setBounds(700,600,150,30);
+		
 		
 		add(js1);
-		add(tf); add(box);
+		add(tf);
+		add(box);
 		add(js2);
 		add(p);
-		
-		String[] data = {"hong", "홍길동", "남자"};
-		model.addRow(data);
-		
-		
-		// 이벤트
-		// 
+		//String[] data = {"hong","홍길동","남자"};
+		//model.addRow(data);
 	}
-	
-	public void initStyle() {
+	public void initStyle()
+	{
 		Style blue = pane.addStyle("blue", null);
 		StyleConstants.setForeground(blue, Color.blue);
-		
-		Style yellow = pane.addStyle("yellow", null);
-		StyleConstants.setForeground(yellow, Color.yellow);
 		
 		Style green = pane.addStyle("green", null);
 		StyleConstants.setForeground(green, Color.green);
@@ -87,16 +81,21 @@ public class ChatPanel extends JPanel {
 		Style pink = pane.addStyle("pink", null);
 		StyleConstants.setForeground(pink, Color.pink);
 		
+		Style yellow = pane.addStyle("yellow", null);
+		StyleConstants.setForeground(yellow, Color.yellow);
+		
 		Style cyan = pane.addStyle("cyan", null);
 		StyleConstants.setForeground(cyan, Color.cyan);
+		
+		Style orange = pane.addStyle("orange", null);
+		StyleConstants.setForeground(orange, Color.orange);
 	}
-	
-	public void append(String msg, String color) {
-		try {
-			Document doc = pane.getDocument();
+	public void append(String msg,String color)
+	{
+		try
+		{
+			Document doc = pane.getDocument(); // Document 인터페이스
 			doc.insertString(doc.getLength(), msg+"\n", pane.getStyle(color));
-		} catch (Exception e) {
-			
-		}
+		}catch(Exception ex) {}
 	}
 }
