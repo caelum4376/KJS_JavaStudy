@@ -652,3 +652,526 @@ FROM EMP;
 
 SELECT ENAME, HIREDATE, TO_CHAR(HIREDATE, 'YYYY/MM/DD HH24:MI:SS')
 FROM EMP;
+
+-- NVL
+SELECT ENAME "이름", sal "급여",
+		comm "성과급", sal+NVL(comm,0) "실제급여"
+FROM emp;
+
+SELECT ename "이름", decode(deptno, 10, '개발부', 20, '영업부', 30, '자재부') "부서명"
+FROM emp;
+
+-- JOIN (NON_EQUI_JOIN)
+SELECT ename "이름", decode(grade, 1, '★☆☆☆☆',
+									2, '★★☆☆☆',
+									3, '★★★☆☆',
+									4, '★★★★☆',
+									5, '★★★★★') "부서명"
+FROM emp, salgrade
+WHERE sal BETWEEN losal AND hisal;
+
+CREATE TABLE salgrade (grade NUMBER, losal NUMBER, hisal number);
+
+INSERT INTO salgrade VALUES (1, 700, 1200);
+INSERT INTO salgrade VALUES (1, 1201, 1400);
+INSERT INTO salgrade VALUES (1, 1401, 2000);
+INSERT INTO salgrade VALUES (1, 2001, 3000);
+INSERT INTO salgrade VALUES (1, 3001, 9999);
+
+
+UPDATE salgrade SET grade = 5 WHERE losal = 3001;
+-- CASE
+SELECT ENAME "이름", CASE 
+					WHEN DEPTNO = 10 THEN '영업부'
+					WHEN DEPTNO = 20 THEN '개발부'
+					WHEN DEPTNO = 30 THEN '분석부'
+					WHEN DEPTNO = 40 THEN '총무부'
+					END "부서명"
+FROM EMP;
+
+SELECT ENAME "이름", CASE 
+					WHEN GRADE = 1 THEN '★☆☆☆☆'
+					WHEN GRADE = 2 THEN '★★☆☆☆'
+					WHEN GRADE = 3 THEN '★★★☆☆'
+					WHEN GRADE = 4 THEN '★★★★☆'
+					WHEN GRADE = 5 THEN '★★★★★'
+					END "등급"
+FROM EMP, SALGRADE 
+WHERE SAL BETWEEN LOSAL AND HISAL;
+
+-- 집합함수
+-- 사원중에 급여가 가장 많은 값, 가장 작은 값
+SELECT MAX(SAL), MIN(SAL), COUNT(*), SUM(SAL), AVG(SAL)
+FROM EMP;
+
+-- 등수
+SELECT ENAME "이름", SAL "급여",
+		RANK() OVER(ORDER BY SAL DESC) "RANK"
+FROM EMP;
+
+SELECT ENAME "이름", SAL "급여",
+		DENSE_RANK() OVER(ORDER BY SAL DESC) "RANK"
+FROM EMP;
+
+SELECT DEPTNO, SUM(SAL), COUNT(*), ROUND(AVG(SAL),2) 
+FROM EMP
+GROUP BY DEPTNO;
+
+-- EMPNO, ENAME, SAL, COMM
+-- HIREDATE, JOB, DEPTNO
+SELECT TO_CHAR(HIREDATE, 'YYYY'), SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP e 
+GROUP BY TO_CHAR(HIREDATE, 'YYYY')
+ORDER BY TO_CHAR(HIREDATE, 'YYYY') ASC;
+
+SELECT JOB, SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP e 
+GROUP BY JOB;
+
+-- 입사한 요일별로 통계
+SELECT TO_CHAR(HIREDATE, 'DY'), SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP
+GROUP BY TO_CHAR(HIREDATE, 'DY')
+ORDER BY TO_CHAR(HIREDATE, 'DY') DESC;
+
+-- 이중 그룹
+SELECT DEPTNO, JOB, SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP e 
+GROUP BY DEPTNO, JOB
+ORDER BY DEPTNO;
+
+/* 
+ * 10
+ *   AAA
+ *   BBB
+ *   CCC
+ * 20
+ *   AAA
+ *   BBB
+ *   CCC
+ * 30
+ *   AAA
+ *   BBB
+ *   CCC
+ * ------- ERP (인사관리, 급여관리...) == 데이터베이스
+ * 1차 => 데이터베이스
+ * 2차 => Spring(기능)
+ * 3차 => 최신(우대사항)
+ */
+
+-- 부서중에 평균 급여보다 작은 부서를 출력
+-- HAVING => 사원별로 찾기 => SUBQUERY
+SELECT AVG(SAL) FROM EMP;
+
+SELECT DEPTNO, SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP e 
+GROUP BY DEPTNO
+HAVING AVG(SAL) < (SELECT AVG(SAL) FROM EMP);
+
+-- HAVING => 인원수가 2명 이상인 부서 출력
+SELECT DEPTNO, SUM(SAL), COUNT(*), ROUND(AVG(SAL),2)
+FROM EMP e 
+GROUP BY DEPTNO 
+HAVING COUNT(*) >=5;
+
+-- SELECT의 순서
+SELECT EMPNO, ENAME, HIREDATE, JOB, SAL, DEPTNO
+FROM EMP;
+
+SELECT * FROM DEPT;
+SELECT * FROM SALGRADE;	
+
+DESC emp;
+
+-- JOIN
+SELECT empno, ename, job, hiredate, sal, emp.deptno, dname
+FROM emp, dept
+WHERE emp.deptno = dept.deptno;
+
+-- 별칭 => 테이블명이 긴 경우 (테이블을 만드는 경우 : 제한이 없다(30))
+-- board_1_1, board_1_2
+SELECT empno, ename, job, hiredate, sal, emp.deptno, dname
+FROM emp JOIN dept
+ON emp.deptno = dept.deptno;
+
+SELECT empno, ename, job, hiredate, sal, e.deptno, dname, loc
+FROM empe e JOIN dept d
+ON e.deptno = d.deptno;
+
+-- NATURAL JOIN
+SELECT empno, ename, job, hiredate, sal, deptno, dname, loc
+FROM emp NATURAL JOIN dept;
+
+-- JOIN ~ USING
+SELECT empno, ename, job, hiredate, sal, emp.deptno, dname, loc
+FROM emp JOIN dept USING(deptno);
+
+-- SELF 조인 => 같은 테이블에서 추출 => 반드시 별칭 처리
+-- mgr = empno
+SELECT e1.ename "본인", e2.ename = "사수"
+FROM emp e1, emp e2
+WHERE e1.mgr = e2.empno(+);
+-- mgr이 없는 경우에는 처리 (NULL값을 처리핮 ㅣ못한)
+-- 같은 테이블에서도 조인이 가능
+-- 별칭, 구분자(식별자) => 165page
+-- 문제 => emp:empno, ename, job, hiredate, dept:dname,
+-- 조건 : 사번이 7788에 해당되는 사원의 정보만 추출
+SELECT empno, ename, job, hiredate, dname, loc
+FROM emp e, dept d
+WHERE e.deptno = d.deptno AND d.deptno = 7788;
+
+-- NATURAL JOIN, JOIN~USING
+SELECT empno, ename, job, hiredate, dname, loc
+FROM emp NATURAL JOIN dept
+WHERE empno = 7788;
+
+-- 비등가 조인 => (=)외의 다른 연산자 사용
+SELECT * FROM salgrade;
+
+-- 포함(논리연산자, BETWEEN연산자 사용)
+SELECT empno, ename, job, hiredate,sal, grade
+FROM emp, salgrade
+WHERE sal BETWEEN losal AND hisal;
+
+--문제
+/*
+ * 	요구사항
+ * 		emp : empno, ename, job, hiredate, sal, deptno
+ * 		dept : dname, loc
+ * 		salgrade : grade
+ * 		1) oracle join
+ * 		2) ansi join
+*/
+-- oracle join
+SELECT empno, ename, job, hiredate, sal, e.deptno, dname, loc, grade
+FROM emp e, dept d, salgrade s
+WHERE e.DEPTNO = d.DEPTNO AND sal BETWEEN losal AND hisal;
+
+
+-- ansi join
+SELECT empno, ename, job, hiredate, sal, e.deptno, dname, loc, grade
+FROM emp e JOIN dept d
+ON e.DEPTNO = d.DEPTNO
+JOIN salgrade s
+ON sal BETWEEN losal AND hisal;
+
+/* 
+ * 	BOOK (책정보 테이블)
+ *      bookid
+ *      bookname
+ *      publisher
+ *      price
+ *  CUSTOMER (고객정보 테이블)
+ *      custid
+ *      name
+ *      address
+ *      phone
+ *  ORDERS (구매정보 테이블)
+ *      orderid
+ *      custid => 고객정보 참조 
+ *      bookid => 책정보 참조 
+ *      saleprice => 할인가 
+ *      orderdate => 구매일
+ *  
+*/
+-- 고객과 고객이 주문한 데이터를 추출
+/*
+ * 	요구사항
+ * 	고객 테이블 : 고객번호, 이름, 주소, 전화
+ * 	구매 테이블 : 책번호, 할인가, 구매일
+*/
+SELECT c.custid, name, address, phone, bookid, saleprice, orderdate
+FROM CUSTOMER c, ORDERS o
+WHERE c.CUSTID = o.CUSTID;
+
+SELECT c.CUSTID, name, address, phone, 
+		bookname, publisher, price, 
+		saleprice
+FROM CUSTOMER c, BOOK b , ORDERS o
+WHERE c.CUSTID = o.CUSTID  AND o.BOOKID = b.BOOKID;
+
+SELECT c.CUSTID, name, address, phone, 
+		bookname, publisher, price, 
+		saleprice
+FROM ORDERS o JOIN BOOK b 
+ON o.BOOKID = b.BOOKID 
+JOIN CUSTOMER c 
+ON o.CUSTID = c.CUSTID;
+
+-- 문제 고객이 구매한 책의 갯수를 확인
+/*
+ * 		custid, name, 구매갯
+ */
+SELECT custid, count(*)
+FROM ORDERS o
+GROUP BY CUSTID;
+
+-- 고객별로 주문한 모든 도서의 총 판매액
+SELECT name, sum(saleprice)
+FROM ORDERS o, CUSTOMER c
+WHERE o.CUSTID = c.CUSTID
+GROUP BY name
+ORDER BY name;
+
+-- 고객이름과 고객이 주문한 책이름을 출력
+SELECT name, bookname
+FROM ORDERS o, CUSTOMER c, BOOK b 
+WHERE o.CUSTID = c.CUSTID AND o.BOOKID = b.BOOKID
+ORDER BY name;
+
+-- 개곡 정보에는 존재 => 구매내역이 없다
+-- 구매하지 않은 고객의 이름 출력
+-- 이름/가격
+SELECT * FROM customer;
+SELECT name, saleprice
+FROM customer c, ORDERS o 
+WHERE c.CUSTID = o.CUSTID;
+
+SELECT name, saleprice
+FROM CUSTOMER c LEFT OUTER JOIN ORDERS o 
+ON o.CUSTID = c.CUSTID;
+
+SELECT name, saleprice
+FROM CUSTOMER c RIGHT OUTER JOIN ORDERS o 
+ON o.CUSTID = c.CUSTID;
+
+-- OUTER JOIN => MINUS
+/*
+ * 		JOIN => 교집합 (INTERSECT)
+ * 		=> 필요에 의하면 없는 데이터를 추출 => OUTER JOIN
+ * 		INTERSECT + MINUS
+ * 					(A-B) (B-A)
+ * 					LEFT  RIGHT
+*/
+
+SELECT deptno FROM DEPT d
+MINUS SELECT DISTINCT deptno FROM emp;
+
+SELECT empno, ename, job, emp.deptno, dname, loc
+FROM emp, dept
+WHERE emp.DEPTNO = dept.DEPTNO;
+
+SELECT empno, ename, job, emp.deptno, dname, loc
+FROM emp, dept
+WHERE emp.DEPTNO(+) = dept.DEPTNO;
+
+
+select count(*) from emp;
+
+/*
+ * 	컬럼에 값을 대입
+ *	비교연산자 : 값은 1개
+ *	IN : 값은 여러개 가
+*/
+SELECT * FROM EMP WHERE DEPTNO IN (SELECT DISTINCT DEPTNO FROM EMP)
+ORDER BY DEPTNO;
+
+-- 자바에서 연동
+-- 평균 급여
+SELECT ROUND(AVG(SAL)) FROM EMP;
+SELECT ENAME, SAL, HIREDATE
+FROM EMP e
+WHERE SAL < 2073;
+
+SELECT ENAME, SAL, HIREDATE
+FROM EMP e 
+WHERE SAL < (SELECT ROUND(AVG(SAL)) FROM EMP);
+/*
+ * 	테이블 => 컬럼
+ * 	DESC 테이블 => 컬럼 확인 / 컬럼 데이터형
+ * 	---------------------------------
+ * 	{}, 변수
+ */
+-- 1. 사람 이름이 SCOTT인 사원의 사번(empno), 이름(ename), 부서명(dname)을 출력하세요
+SELECT empno, ename, dname
+FROM emp, DEPT d 
+WHERE emp.DEPTNO = d.DEPTNO
+AND ename='SCOTT'
+
+-- 2. 사원이름과 급여(sal)와 급여등급(grade)을 출력하세요 (BETWEEN(연산자) => 비등가 조인(NON-EQUI-JOIN) 포함관계)
+SELECT sal, grade
+FROM emp, salgrade
+WHERE sal BETWEEN losal AND hisal;
+
+-- 3. 위 2번 문제에서 부서명을 추가시켜 출력하세요
+SELECT ename, sal, grade, dname
+FROM emp, dept, SALGRADE
+WHERE emp.DEPTNO = dept.DEPTNO 
+AND sal BETWEEN losal AND hisal;
+
+-- 4. 사원이름과 매니저의 이름을 아래와 같은 형식으로 출력하세요 => 
+SELECT e1.ename || '의 매니저는 ' || e2.ename ||
+
+-- 5. 부서번호가 30번인 사원들의 이름, 직급(job), 부서번호(deptno), 부서위치(loc)를 출력하세요
+SELECT ename, job, emp.deptno, loc 
+FROM emp, dept
+WHERE emp.deptno = dept.DEPTNO AND emp.deptno=30;
+
+-- 6. 보너스(comm)을 받은사원의 이름, 보너스, 부서명, 부서위치를 출력하세요. => 연산자 처리 => IS NOT NULL
+SELECT ename, comm, dname, loc
+FROM emp, DEPT
+WHERE emp.DEPTNO = dept.DEPTNO
+AND comm IS NOT NULL
+AND comm<>0;
+
+-- 7. DALLAS에서 근무하는 사원들의 이름, 직급, 부서번호, 부서명을 출력하세요.
+SELECT ename, job, emp.deptno, dname
+FROM emp, DEPT
+WHERE emp.DEPTNO = dept.DEPTNO
+AND loc = 'DALLAS';
+
+-- 8. 이름에 'A'가 들어가는 사원들의 이름과 부서명을 출력하세요
+SELECT ename, job, emp.deptno, dname
+FROM emp, DEPT
+WHERE emp.DEPTNO = dept.DEPTNO
+AND ename LIKE '%A%';
+
+-- 서브쿼리 (메인쿼리, 서브쿼리) => SQL문장을 여러
+/*
+ * 	=> 결과값 데이터를 몇개인가
+ * 		1) 컬럼1, 결과1
+ * 			단일행 서브쿼리
+ * 		2) 컬럼1, 결과 여러개
+ * 			다중행 서브쿼리
+ * 		------------------------
+ * 		3) 컬럼이 여러개, 결과 여러개
+ * 			다중컬럼 서브쿼리
+ * 		4) 연관컬럼 서브쿼리
+*/
+-- 단일행 서브쿼리
+-- 요구사항 => Book테이블에서 가장 비싼책의 이름, 출판사, 가격
+SELECT max(price) FROM book;
+
+-- 미리 연결한 다음에 연결된 Connection을 사용 => DBCP
+SELECT bookname, publisher, price
+FROM BOOK
+WHERE price = (SELECT max(price) FROM book);
+
+
+
+-- SCOTT의 정보를 출력 : 사번, 이름, 직위, 입사일, 근무지, 부서명
+-- 1. JOIN
+-- 2. 서브쿼리 => 사용 (속도가 더 빠름)
+SELECT empno, ename, job, hiredate, loc, dname
+FROM emp e, dept d
+WHERE e.deptno = d.deptno
+AND empno = (SELECT empno FROM emp WHERE ename = 'SCOTT');
+
+-- 급여가 가장 많이 받는 사원중에 같은 부서에 근무하는 모든 사원 정보
+/*
+ * 	1. 급여가가장 많은 사원
+ * 		select max(sal) from emp;
+ *  2. 찾느 사원의 부서번호
+ * 		select deptno from emp
+ * 		where sal = 5000
+ *  3. 같은 부서에서 근무자를 찾는
+ * 		select * from emp
+ * 		where deptno = 10
+*/
+SELECT * FROM EMP
+WHERE deptno = (select deptno from emp 
+				WHERE sal = (select max(sal) from emp));
+				
+-- KING이라는 사원과 동일한 부서에서 근무하는 사원의 모든 정보
+SELECT * FROM emp
+WHERE deptno = (SELECT deptno FROM emp WHERE ename = 'KING');
+
+-- SCOTT사원의 부서명과 근무지 출력
+SELECT dname, loc FROM dept
+WHERE deptno = (SELECT deptno FROM emp WHERE ename = 'SCOTT');
+
+-- T자가 들어가는 사원과 같은 부서에서 근무하는 사원의 정보를 추출
+SELECT * FROM emp
+WHERE deptno in (SELECT deptno FROM emp WHERE ename LIKE '%T%');
+
+-- 부서위치(loc)가 DALLAS인 모든 사원의 이름, 부서번호를 출력하세요
+-- DALLAS의 부서번호 확인
+SELECT deptno FROM dept WHERE loc = 'DALLAS';
+
+-- 확인된 부서번호를 가지고 있는 사원 출력
+SELECT ename, deptno FROM EMP e
+WHERE deptno = 20;
+
+-- 통합
+SELECT ename, deptno 
+FROM EMP e
+WHERE deptno = (SELECT deptno 
+				FROM dept WHERE loc = 'DALLAS');
+				
+-- SALES 부서의 모든 사원의 이름과 급여를 출력하세요
+SELECT ename, sal
+FROM EMP e 
+WHERE deptno = (SELECT deptno 
+				FROM dept WHERE dname = 'SALES');
+				
+-- 응용프로그램의 속도를 최적화 => 한번만 수행이 가능
+SELECT *
+FROM EMP e 
+WHERE deptno < any(SELECT DISTINCT deptno FROM EMP);
+-- deptno < 30
+
+SELECT *
+FROM EMP e 
+WHERE deptno > any(SELECT DISTINCT deptno FROM EMP);
+-- deptno > 10
+
+SELECT *
+FROM EMP e 
+WHERE deptno < all(SELECT DISTINCT deptno FROM EMP);
+-- deptno < 10
+
+SELECT *
+FROM EMP e 
+WHERE deptno > all(SELECT DISTINCT deptno FROM EMP);
+-- deptno > 30
+
+-- 1. 가격이 20000원인 도서를 주문한 고객의 이름과 도서의 이름을 구하시오
+SELECT c.NAME, b.BOOKNAME
+FROM CUSTOMER c , BOOK b, ORDERS o 
+WHERE c.CUSTID = o.CUSTID AND b.BOOKID = o.BOOKID
+AND o.bookid = (SELECT bookid FROM book WHERE price = 20000)
+
+
+-- 2. 도서를 구매하지 않은 고객을 포함하여 고객의 이름과 주문한 도서의 판매가격을 구하시오.
+SELECT c.name, o.saleprice
+FROM CUSTOMER c, ORDERS o 
+WHERE c.CUSTID = o.CUSTID(+);
+
+-- 3. 가장 비싼 도서의 이름을 보이시오
+SELECT BOOKNAME 
+FROM BOOK
+WHERE price = (SELECT max(PRICE) FROM BOOK b);
+
+-- 4. 대한미디어에서 출판한 도서를 구매한 고객의 이름을 보이시오
+SELECT name
+FROM CUSTOMER
+WHERE custid IN (SELECT custid 
+				FROM orders 
+				WHERE bookid in (SELECT bookid 
+								FROM book 
+								WHERE publisher = '대한미디어'));
+
+-- 5. 출판사별로 출판사의 평균 도서 가격보다 비싼 도서를 구하시오
+SELECT b1.bookname
+FROM BOOK b1
+WHERE b1.price > (SELECT avg(b2.PRICE) FROM book b2 WHERE b1.PUBLISHER = b2.publisher);
+
+-- 6. 도서를 주문하지 않은 고객의 이름을 보이시오
+SELECT name
+FROM CUSTOMER
+WHERE custid NOT IN (SELECT custid FROM orders)
+
+/*
+ * 	테이블 여러개 데이터 추출
+ * 	1) JOIN
+ * 	2) 조건이 많다 => subQuery
+ * 	   JOIN 대신 subQuery ==> 스칼라 서브쿼리
+ *     ***1차 프로젝트 가급적이면 join, subquery 사용 권장
+ *  -----------------------------------------------
+ * 	오라클 기본
+ * 	--------
+ * 	SELECT : DQL
+ * 			형식, 연산자, 내장함수, JOIN, subQuery
+ * 			---------------------------------
+ * 			
+*/
