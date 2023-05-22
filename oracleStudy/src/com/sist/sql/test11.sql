@@ -1,93 +1,69 @@
--- 2023-05-17 오라클 JOIN
+-- 2023-05-17 부속질의(서브쿼리) ==> 쿼리안에 쿼리
 /*
-    서로 다른 테이블(같은 테이블)에서 필요한 데이터를 추출하는 기술
-    = 테이블은 관련된 데이터만 모아둔다 (테이블이 여러개로 나눠져 있다) => 정규화
-    ex) 게시판/댓글, 영화/예매, 음식정정보/카테고리 => 조인, 서브쿼리, 뷰
+    JOIN은 SELECT에서만 사용이 가능
+    SubQuery : SELECT, INSERT, UPDEATE, DELETE, 테이블 대신, 컬럼대신 사용이 가능
+    => 서브쿼리가 많이 사용이 된다
 
-    1. JOIN 종류
-        = INNER JOIN
-            등가조인 (EQUI_JOIN) => 데이터값이 같은 경우에 사용 (컬럼명은 다를 수도 있다)
-                                    -------------------- 참조키 (FOREIGN KEY)
-                                    연산자 : =
-            비등가조인 (NON_EQUI_JOIN) => 데이터 포함여부, 연산자 : =외의 연산자사용
-                                          AND, BETWEEN ~ AND
-            자연조인 : 같은 컬럼명을 가지고 있다 (JOIN~USING)
-        = 연습 : emp(사원정보)/dept(부서정보), book,customer(교재)
-        = SELF 조인 (같은 테이블에서 작업)
-        = 주의점 : 테이블에서 같은 컬럼명을 조회할 떄 => 구분
-                   테이블명.컬럼명, 별칭명.컬럼명
-                   ------------------------------ 애매한 정의
-                   FROM 테이블명, 테이블명
-                   FROM 테이블명 별칭, 테이블명 별칭
-        = 이차 for문과 동일 => if(a=b)
-        for() { => 왼쪽테이블
-            for() { => 오른쪽테이블
-                if(=) { EQUI_JOIN => if(>= && <=) NON_EQUI_JOIN
-                    추출
-                }
-            }
-        }
-
-        = INNER JOIN 형식
-            A : a,b,c
-            B : b,d,e
-
-            => Oracle JOIN
-            SELECT a,A,b,c,d,e
-            FROM A,B
-            WHERE A.a = B.b
-
-            => ANSI JOIN : 표준화(MySQL, MariaDB)
-            SELECT a,A,b,c,d,e
-            FROM A JOIN B
-            ON A.a = B.b
-            ----------------------------------------- 컬럼명이 동일
-            SELECT a,A,b,c,d,e
-            FROM A NARRAL JOIN B b컬럼을 검색해서 추출
-
-            = JOIN ~ USING
-            SELECT A JOIN B USING(b)
-
-        = OUTER JOIN (INNTER JOIN+NULL값 처리)
-            = LEFT OUTER JOIN
-                *Oracle JOIN
-                 SELECT A.a,A.b,B.a,B.c
-                 FROM A,B
-                 WHERE A.a = B.a(+)
-                *ANSI JOIN
-                 SELECT A.a,A.b,B.a,B.c
-                 FROM A LEFT OUTER JOIN B
-                 ON A.a = B.b
-            = RIGHT OUTER JOIN
-                *Oracle JOIN
-                 SELECT A.a,A.b,B.a,B.c
-                 FROM A,B
-                 WHERE A.a(+) = B.a
-                *ANSI JOIN
-                 SELECT A.a,A.b,B.a,B.c
-                 FROM A RIGHT OUTER JOIN B
-                 ON A.a = B.b
-            = FULL OUTER JOIN
+    => 종류
+        1) 단일행 서브쿼리 => 결과값이 1개 (컬럼=1)
+        2) 다중행 서브쿼리 => 결과값이 여러개 (컬럼=1)
+            형식
+            MainQuery WHERE 컬럼 =(SubQuery)
+                                   --------
+            ---------                 1 
+                2 => SubQuery에서 나온 결과를 받아서 MainQuery를 실행하는 방식
+        --------------------- WHERE
+        3) 스칼라 서브쿼리 : 컬럼대신 사용 (다른 테이블 데이터를 읽어 올때 : JOIN대신)
+            형식
+            SELECT (SELECT~),(SELECT~)
+        --------------------- SELECT
+        4) 테이블 대신 사용하는 서브쿼리 (인라인뷰) => 가장많이 등장 (페이지 나누기)
+            형식
+            SELECT~
+            FROM (SELECT~)
+        --------------------- FROM
+    
 */
--- emp : empno, ename, job, hiredate, sal, DESCRIPTION
--- dept : dname, category, deptno
--- => 공통으로 사용되는 컬럼 : deptno
+-- 단일행 서브쿼리
+-- 형식
+/* 
+    SELECT ~
+    FROM table_name
+    WHERE 컬럼=(SELECT~)
+
+    자바에서 오라클 연동 => 웹프로그래머
+    SQL문장을 몇번 전송
+    SQL문장을 2번 전송
+     => 연결 ==> 시간이 오래 걸린다
+        SQL문장 전송
+        결과값 받기
+        연결 해제
+        연결
+        SQL문장 전송
+        결과값 받기
+        연결 해제
+        -------------
+        데이터를 합쳐서 사용 (JOIN)
+        SQL을 합쳐서 사용 (SubQuery)
+*/
+-- emp에서 평균급여보다 적게 받는 사원의 이름, 급여, 입사일 AVG
+-- 1. 평균급여
+-- 2. 비교후 검색
 
 /*
-    BOOK
-        booki
-        bookname
-        publisher
-        price
-    CUSTOMER
-        custid
-        name
-        address
-        phone
-    ORDERS
-        orderid
-        custid
-        bookid
-        saleprice
-        orderdate
+    다중행 서브쿼리 : 컬럼 1개 => 결과값이 여러개일때 사용
+    ------------------ WHERE 컬럼명 연산자 값(SELECT~~)
+                                    ------ 한개를 제외하고 단일
+                                           IN(여러개) 
+                             컬럼명 연산자 값
+    => IN (모든 데이터를 적용)
+    => (10, 20, 30) => 가장 큰값, 가장 작은값
+        ANY, SOME, ALL, IN
+        IN => 10, 20, 30 => 전체 적용
+        컬럼 < ANY(10,20,30) => 최대값 30만 적용
+        컬럼 > ANY(10,20,30) => 최소값 10만 적용
+
+        컬럼 < ALL(10,20,30) => 최소값 10
+        컬럼 > ALL(10,20,30) => 최대값 30
+        ---------------------------------------- MAX, MIN
 */
